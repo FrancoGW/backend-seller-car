@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Schema as MongooseSchema } from 'mongoose';
 
 @Schema({ timestamps: true, collection: 'analytics_events' })
 export class AnalyticsEvent {
   @Prop({ required: true }) name: string;
-  @Prop() payload?: Record<string, unknown>;
+  @Prop({ type: MongooseSchema.Types.Mixed }) payload?: Record<string, unknown>;
   @Prop() sessionId?: string;
   @Prop() path?: string;
 }
