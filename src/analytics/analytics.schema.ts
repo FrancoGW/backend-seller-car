@@ -1,0 +1,13 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
+@Schema({ timestamps: true })
+export class AnalyticsEvent {
+  @Prop({ required: true }) name: string;
+  @Prop() payload?: Record<string, unknown>;
+  @Prop() sessionId?: string;
+  @Prop() path?: string;
+}
+
+export const AnalyticsEventSchema = SchemaFactory.createForClass(AnalyticsEvent);
+AnalyticsEventSchema.index({ name: 1, createdAt: -1 });
+AnalyticsEventSchema.index({ sessionId: 1 });
