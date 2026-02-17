@@ -11,6 +11,12 @@ export class AppFactory {
     expressApp: Express;
   } {
     const expressApp = express();
+
+    // Ruta raíz: confirma que el backend está en marcha (para Vercel y health checks)
+    expressApp.get('/', (_req: Request, res: Response) => {
+      res.status(200).type('text/plain').send('Backend funcionando');
+    });
+
     const adapter = new ExpressAdapter(expressApp);
     const appPromise = NestFactory.create(AppModule, adapter);
 
