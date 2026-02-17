@@ -12,7 +12,9 @@ import { SendgridModule } from './sendgrid/sendgrid.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || ''),
+    MongooseModule.forRoot(process.env.MONGODB_URI || '', {
+      dbName: 'StuntArgentinoCars',
+    }),
     SendgridModule,
     AuthModule,
     VehiclesModule,

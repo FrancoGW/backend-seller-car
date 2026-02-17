@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'analytics_events' })
 export class AnalyticsEvent {
   @Prop({ required: true }) name: string;
   @Prop() payload?: Record<string, unknown>;

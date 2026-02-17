@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'contacts' })
 export class Contact {
   @Prop({ required: true }) name: string;
   @Prop({ required: true }) email: string;
