@@ -8,7 +8,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { UploadModule } from './upload/upload.module';
 import { AdminModule } from './admin/admin.module';
 import { SendgridModule } from './sendgrid/sendgrid.module';
-import { ConfigModule } from './config/config.module';
+import { ConfigModule as SiteConfigModule } from './config/config.module';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { ConfigModule } from './config/config.module';
     AnalyticsModule,
     UploadModule,
     AdminModule,
-    ConfigModule,
+    SiteConfigModule,
   ],
 })
 export class AppModule {}

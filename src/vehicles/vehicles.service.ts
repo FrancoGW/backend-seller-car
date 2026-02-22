@@ -119,7 +119,8 @@ export class VehiclesService {
     if (isPublishing && data.plan && data.plan !== 'ninguno') {
       planExpiresAt = oneMonthFromNow;
     }
-    let publishedAt = current.publishedAt ? new Date((current as { publishedAt?: Date }).publishedAt) : undefined;
+    const existingPublishedAt = (current as { publishedAt?: Date }).publishedAt;
+    let publishedAt = existingPublishedAt != null ? new Date(existingPublishedAt) : undefined;
     if (data.published && !wasPublished) {
       publishedAt = now;
     }
