@@ -9,6 +9,8 @@ export class Contact {
   @Prop({ required: true }) message: string;
   @Prop({ type: Types.ObjectId, ref: 'Vehicle' }) vehicleId?: Types.ObjectId;
   @Prop({ default: 'web' }) source: string;
+  @Prop({ default: 'pendiente' }) status: string;
+  @Prop() repliedAt?: Date;
 }
 
 export const ContactSchema = SchemaFactory.createForClass(Contact);

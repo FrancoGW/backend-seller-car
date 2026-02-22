@@ -102,7 +102,7 @@ export class AdminService {
   }
 
   async replyToContact(contactId: string, subject: string, body: string) {
-    const contact = await this.contactModel.findById(contactId).lean();
+    const contact = await this.contactModel.findById(contactId);
     if (!contact) throw new NotFoundException('Contacto no encontrado');
     const result = await this.sendgrid.sendEmail({
       to: contact.email,
@@ -112,6 +112,22 @@ export class AdminService {
     if (result && 'error' in result && result.error) {
       throw new BadRequestException('No se pudo enviar el correo: ' + (result.error as string));
     }
+    contact.status = 'contestado';
+    contact.repliedAt = new Date();
+    await contact.save();
     return { success: true };
+  }
+
+  async updateContactStatus(contactId: string, status: string) {
+    if (status !== 'pendiente' && status !== 'contestado') {
+      throw new BadRequestException('Estado debe ser pendiente o contestado');
+    }
+    const contact = await this.contactModel.findByIdAndUpdate(
+      contactId,
+      { status, ...(status === 'pendiente' ? { repliedAt: null } : { repliedAt: new Date() }) },
+      { new: true },
+    );
+    if (!contact) throw new NotFoundException('Contacto no encontrado');
+    return { success: true, status: contact.status };
   }
 }

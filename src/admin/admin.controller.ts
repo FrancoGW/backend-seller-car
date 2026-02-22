@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
@@ -28,5 +28,15 @@ export class AdminController {
     if (!subject) throw new BadRequestException('El asunto es obligatorio');
     if (!text) throw new BadRequestException('El mensaje es obligatorio');
     return this.adminService.replyToContact(id, subject, text);
+  }
+
+  @Patch('contactos/:id/status')
+  async updateContactStatus(
+    @Param('id') id: string,
+    @Body() body: { status?: string },
+  ) {
+    const status = typeof body?.status === 'string' ? body.status.trim() : '';
+    if (!status) throw new BadRequestException('El estado es obligatorio');
+    return this.adminService.updateContactStatus(id, status);
   }
 }
