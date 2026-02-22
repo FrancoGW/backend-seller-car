@@ -8,6 +8,7 @@ export const vehicleSchema = z.object({
   brand: z.string().min(1, 'Marca requerida').max(100),
   model: z.string().min(1, 'Modelo requerido').max(100),
   year: z.number().min(1900).max(new Date().getFullYear() + 1),
+  vehicleType: z.enum(['auto', 'moto']).optional().default('auto'),
   mileage: z.number().min(0).optional().nullable(),
   fuel: z.string().max(50).optional().nullable(),
   transmission: z.string().max(50).optional().nullable(),

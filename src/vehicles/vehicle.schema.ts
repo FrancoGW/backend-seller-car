@@ -9,6 +9,7 @@ export class Vehicle {
   @Prop({ required: true }) brand: string;
   @Prop({ required: true }) model: string;
   @Prop({ required: true }) year: number;
+  @Prop({ enum: ['auto', 'moto'], default: 'auto' }) vehicleType?: 'auto' | 'moto';
   @Prop() mileage?: number;
   @Prop() fuel?: string;
   @Prop() transmission?: string;
@@ -20,6 +21,7 @@ export class Vehicle {
   @Prop({ type: [String], default: [] }) images: string[];
   @Prop({ default: false }) featured: boolean;
   @Prop({ default: false }) published: boolean;
+  @Prop() publishedAt?: Date;
   @Prop() vtvExpiresAt?: Date;
   @Prop() patentExpiresAt?: Date;
   @Prop() clientFirstName?: string;

@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Vehicle } from '../vehicles/vehicle.schema';
 import { Contact } from '../contact/contact.schema';
 import { AnalyticsEvent } from '../analytics/analytics.schema';
+import { SendgridService } from '../sendgrid/sendgrid.service';
 
 @Injectable()
 export class AdminService {
@@ -11,6 +12,7 @@ export class AdminService {
     @InjectModel(Vehicle.name) private vehicleModel: Model<Vehicle>,
     @InjectModel(Contact.name) private contactModel: Model<Contact>,
     @InjectModel(AnalyticsEvent.name) private analyticsModel: Model<AnalyticsEvent>,
+    private sendgrid: SendgridService,
   ) {}
 
   async getStats() {
@@ -97,5 +99,19 @@ export class AdminService {
   async getContacts(limit = 100) {
     const items = await this.contactModel.find().sort({ createdAt: -1 }).limit(limit).lean();
     return { items };
+  }
+
+  async replyToContact(contactId: string, subject: string, body: string) {
+    const contact = await this.contactModel.findById(contactId).lean();
+    if (!contact) throw new NotFoundException('Contacto no encontrado');
+    const result = await this.sendgrid.sendEmail({
+      to: contact.email,
+      subject,
+      text: body,
+    });
+    if (result && 'error' in result && result.error) {
+      throw new BadRequestException('No se pudo enviar el correo: ' + (result.error as string));
+    }
+    return { success: true };
   }
 }

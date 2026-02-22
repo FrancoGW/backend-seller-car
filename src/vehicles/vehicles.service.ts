@@ -82,15 +82,17 @@ export class VehiclesService {
     if (!parsed.success) throw new BadRequestException({ error: 'Datos inválidos', details: parsed.error.flatten() });
     const data = parsed.data;
     const now = new Date();
+    const isPublishing = !!data.published && !!data.plan && data.plan !== 'ninguno';
     const oneMonthLater = new Date(now);
     oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
 
     const toSave = {
       ...data,
+      ...(data.published ? { publishedAt: now } : {}),
       vtvExpiresAt: data.vtvExpiresAt ? new Date(data.vtvExpiresAt) : undefined,
       patentExpiresAt: data.patentExpiresAt ? new Date(data.patentExpiresAt) : undefined,
       ...(data.plan && data.plan !== 'ninguno'
-        ? { planExpiresAt: data.planExpiresAt ? new Date(data.planExpiresAt) : oneMonthLater }
+        ? { planExpiresAt: data.planExpiresAt ? new Date(data.planExpiresAt) : (isPublishing ? oneMonthLater : undefined) }
         : {}),
       addonDestacado24hUntil: data.addonDestacado24hUntil ? new Date(data.addonDestacado24hUntil) : undefined,
       addonPrioritario7dUntil: data.addonPrioritario7dUntil ? new Date(data.addonPrioritario7dUntil) : undefined,
@@ -104,10 +106,39 @@ export class VehiclesService {
     const parsed = vehicleSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException({ error: 'Datos inválidos', details: parsed.error.flatten() });
     const data = parsed.data;
+    const current = await this.vehicleModel.findById(id).lean();
+    if (!current) throw new NotFoundException('No encontrado');
+
+    const now = new Date();
+    const wasPublished = !!current.published;
+    const isPublishing = !!data.published && !wasPublished;
+    const oneMonthFromNow = new Date(now);
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+    let planExpiresAt: Date | undefined = data.planExpiresAt ? new Date(data.planExpiresAt) : undefined;
+    if (isPublishing && data.plan && data.plan !== 'ninguno') {
+      planExpiresAt = oneMonthFromNow;
+    }
+    let publishedAt = current.publishedAt ? new Date((current as { publishedAt?: Date }).publishedAt) : undefined;
+    if (data.published && !wasPublished) {
+      publishedAt = now;
+    }
+
+    if (data.featured === true) {
+      const featuredCount = await this.vehicleModel.countDocuments({ featured: true, _id: { $ne: id } });
+      if (featuredCount >= 6) {
+        throw new BadRequestException('Ya hay 6 publicaciones destacadas. Desmarcá otra para destacar esta.');
+      }
+    }
+
     const toSave = {
       ...data,
+      ...(publishedAt ? { publishedAt } : {}),
       vtvExpiresAt: data.vtvExpiresAt ? new Date(data.vtvExpiresAt) : undefined,
       patentExpiresAt: data.patentExpiresAt ? new Date(data.patentExpiresAt) : undefined,
+      ...(planExpiresAt ? { planExpiresAt } : {}),
+      addonDestacado24hUntil: data.addonDestacado24hUntil ? new Date(data.addonDestacado24hUntil) : undefined,
+      addonPrioritario7dUntil: data.addonPrioritario7dUntil ? new Date(data.addonPrioritario7dUntil) : undefined,
     };
     const vehicle = await this.vehicleModel
       .findByIdAndUpdate(id, { $set: sanitizeObject(toSave as Record<string, unknown>) }, { new: true })
