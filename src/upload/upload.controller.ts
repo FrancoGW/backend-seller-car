@@ -14,7 +14,7 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   async upload(@UploadedFile() file: Express.Multer.File) {
     if (!file?.buffer) throw new BadRequestException('Falta el archivo "file"');
-    const { url, publicId } = await this.uploadService.upload(file.buffer);
+    const { url, publicId } = await this.uploadService.upload(file.buffer, file.mimetype);
     return { url, publicId };
   }
 }
