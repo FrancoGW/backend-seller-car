@@ -17,7 +17,7 @@ export class UploadService {
   async upload(buffer: Buffer): Promise<{ url: string; publicId: string }> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: FOLDER, resource_type: 'image' },
+        { folder: FOLDER, resource_type: 'auto' },
         (err, result) => {
           if (err) return reject(err);
           if (!result?.secure_url) return reject(new Error('Upload sin URL'));
