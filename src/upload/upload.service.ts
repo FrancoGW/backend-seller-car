@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
 import sharp from 'sharp';
-import heicConvert from 'heic-convert';
+import heicConvert = require('heic-convert');
 
 const FOLDER = 'sellercar/vehicles';
 const IMAGE_QUALITY = 80;
