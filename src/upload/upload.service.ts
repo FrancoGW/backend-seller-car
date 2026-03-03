@@ -35,9 +35,21 @@ export class UploadService {
     });
   }
 
+  private isHeicBuffer(buffer: Buffer): boolean {
+    // HEIC/HEIF magic bytes: offset 4 = "ftyp", offset 8 = brand (heic, heis, mif1, msf1, hevc, etc.)
+    if (buffer.length < 12) return false;
+    const ftyp = buffer.toString('ascii', 4, 8);
+    if (ftyp !== 'ftyp') return false;
+    const brand = buffer.toString('ascii', 8, 12);
+    return ['heic', 'heis', 'mif1', 'msf1', 'hevc', 'hevx', 'avif'].includes(brand);
+  }
+
   private async processBuffer(buffer: Buffer, mimetype?: string): Promise<Buffer> {
-    const isHeic = mimetype === 'image/heic' || mimetype === 'image/heif';
-    const isImage = mimetype?.startsWith('image/');
+    const isHeicByMime = mimetype === 'image/heic' || mimetype === 'image/heif';
+    const isHeic = isHeicByMime || this.isHeicBuffer(buffer);
+
+    // Si es HEIC detectado por bytes mágicos, tratarlo como imagen aunque el mimetype sea incorrecto
+    const isImage = isHeic || mimetype?.startsWith('image/');
 
     if (!isImage) return buffer;
 
